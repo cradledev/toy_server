@@ -5,7 +5,7 @@ mongoose.connect(config.DB.URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useCreateIndex: true,
-  useFindAndModify: true
+  useFindAndModify: false
 })
 
 const connection = mongoose.connection 

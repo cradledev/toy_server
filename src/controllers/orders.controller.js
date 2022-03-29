@@ -7,7 +7,7 @@ const getOrders = (req, res) => {
     .populate("client")
     .populate("orderItems.product")
     .exec((err, orders) => {
-      return res.json(orders);
+      return res.json({ok : true, orders});
     });
 };
 

@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const CategorySchema = new Schema({
-    name: String,
+    name: {type:String, required : true},
     slug: { type: String, index: true },
     parent: {
       type: mongoose.Schema.Types.ObjectId,
@@ -24,6 +24,7 @@ const CategorySchema = new Schema({
     timestamps: true
   }
 );
+
 function slugify(string) {
   const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìıİłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;'
   const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------'

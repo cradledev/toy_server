@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const UserSchema = new Schema({
-  displayName: {
+  firstname: {
     type: String,
     required: true
   },
@@ -13,9 +13,9 @@ const UserSchema = new Schema({
     required: true,
     lowercase: true
   },
-  username: {
+  lastname: {
     type: String,
-    minlength: 4,
+    // minlength: 4,
     trim: true,
     required: true
   },
@@ -29,10 +29,14 @@ const UserSchema = new Schema({
     maxlength: 512,
     required: false
   },
+  bio : {
+    type : String,
+    requried: false,
+  },
   role: {
     type: String,
     enum: ["SUPERADMIN","ADMIN","USER"],
-    default: "USER"
+    default: "USER",
   },
   status: {
     type: Boolean,

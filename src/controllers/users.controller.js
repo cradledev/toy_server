@@ -8,6 +8,12 @@ CTRLS.getUsers = (req, res) => {
     .sort({ createdAt: "DESC" })
     .where({ status: true })
     .exec((err, users) => {
+      if (err) {
+        return res.status(401).json({
+          ok: false,
+          err,
+        });
+      }
       return res.json(users);
     });
 };
@@ -15,22 +21,29 @@ CTRLS.getUsers = (req, res) => {
 CTRLS.getUser = (req, res) => {
   const { id } = req.params;
   User.findById(id).exec((err, user) => {
-    return res.json(user);
+    if (err) {
+      return res.status(401).json({
+        ok: false,
+        err,
+      });
+    }
+    return res.json({ ok:true, user});
   });
 };
 
 CTRLS.saveUser = (req, res) => {
   const user = new User({
-    displayName: req.body.displayName,
+    firstname: req.body.firstname,
     email: req.body.email,
-    username: req.body.username,
+    lastname: req.body.lastname,
     password: bcrypt.hashSync(req.body.password, 10),
-    avatar: req.body.avatar,
-    role: req.body.role,
-    status: req.body.status,
+    avatar: req.body.avatar?req.body.avatar:null,
+    role: req.body.role?req.body.role : "USER",
+    status: true,
+    bio : req.body.bio?req.body.bio:null
   });
-
-  console.log(req.body);
+  
+  // console.log(req.body);
 
   user.save((err, newUser) => {
     if (err) {
@@ -49,16 +62,15 @@ CTRLS.saveUser = (req, res) => {
 
 CTRLS.updateUser = (req, res) => {
   const { id } = req.params;
-  const user = {
-    displayName: req.body.displayName,
-    email: req.body.email,
-    username: req.body.username,
-    password: bcrypt.hashSync(req.body.password, 10),
-    avatar: req.body.avatar,
-    role: req.body.role,
-    status: req.body.status,
-  };
-
+  const user = {};
+  if(req.body.firstname) user.firstname = req.body.firstname;
+  if(req.body.email) user.email = req.body.email;
+  if(req.body.lastname) user.lastname = req.body.lastname;
+  if(req.body.avatar) user.avatar = req.body.avatar;
+  if(req.body.role) user.role = req.body.role;
+  if(req.body.status) user.status = req.body.status;
+  if(req.body.bio) user.bio = req.body.bio;
+  if(req.body.password) user.password = bcrypt.hashSync(req.body.password, 10);
   User.findByIdAndUpdate(id, user, { new: true }, (err, updUser) => {
     if (err) {
       return res.status(401).json({

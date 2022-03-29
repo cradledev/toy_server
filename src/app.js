@@ -16,7 +16,6 @@ app.use(fileUpload())
 app.use("/api/v1/users", require("./routes/user.routes"));
 app.use("/api/v1/products", require("./routes/product.routes"));
 app.use("/api/v1/orders", require("./routes/order.routes"));
-app.use("/api/v1/clients", require("./routes/client.routes"));
 app.use("/api/v1/auth", require("./routes/auth.routes"));
 app.use("/api/v1/categories", require("./routes/category.routes"));
 
