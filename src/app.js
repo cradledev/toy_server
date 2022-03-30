@@ -8,6 +8,7 @@ const app = express();
 //Middlewares
 app.use(cors());
 app.use(express.json());
+// app.use("/", express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(fileUpload())
@@ -24,6 +25,11 @@ app.get("/", (req, res) => {
     msg: "Welcome a Toy-Commerce REST API",
   });
 });
+// try {
+//   res.sendFile(__dirname + "/client/public/index.html");
+// } catch (error) {
+//   next();
+// }
 // Handle Error Requests
 app.use((req, res, next) => {
   const error = new Error();
