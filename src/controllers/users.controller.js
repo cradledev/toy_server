@@ -4,9 +4,66 @@ const bcrypt = require("bcrypt");
 const CTRLS = {};
 
 CTRLS.getUsers = (req, res) => {
-  User.find({})
-    .sort({ createdAt: "DESC" })
-    .where({ status: true })
+  // User.find({})
+  //   .sort({ createdAt: "DESC" })
+  //   .where({ status: true })
+  //   .exec((err, users) => {
+  //     if (err) {
+  //       return res.status(401).json({
+  //         ok: false,
+  //         err,
+  //       });
+  //     }
+  //     return res.json(users);
+  //   });
+  User.aggregate([
+    { $group : { _id : "$status" , number : { $sum : 1 } } }
+  ])
+  .exec((err, users) => {
+    // console.log(users)
+    if (err) {
+      return res.status(401).json({
+        ok: false,
+        err,
+      });
+    }
+    return res.json({users});
+  })
+};
+
+CTRLS.getUserByFilter = (req, res) => {
+  const sort = req.body.sort;
+  const sortColumn = req.body.sortColumn;
+  const q = req.body.q;
+  const status = req.body.status;
+  const perPage = req.body.perPage;
+  const role = req.body.role;
+  const page = Math.max(0, req.body.page);
+  const query = {
+    $or: [
+      { 'firstname': { '$regex': q, '$options': 'i' } },
+      { 'bio': { '$regex': q, '$options': 'i' } },
+      { 'lastname': { '$regex': q, '$options': 'i' } }
+    ]};
+  const whereQuery = {};
+  if (status == "active") {
+    whereQuery.status = true;
+  } 
+  if (status == "inactive" ) {
+    whereQuery.status = false;
+  }
+  if (role.trim()) {
+    whereQuery.role = role.trim().toUpperCase();
+  }
+  const sortContent = {}
+  if(sortColumn != null) {
+    sortContent[sortColumn] = sort;
+  }
+  if((status == "empty" || status == null) && !role.trim()) {
+    User.find({...query})
+    .limit(perPage * 1)
+    .skip(perPage * (page * 1 - 1))
+    .sort(sortContent)
     .exec((err, users) => {
       if (err) {
         return res.status(401).json({
@@ -14,10 +71,40 @@ CTRLS.getUsers = (req, res) => {
           err,
         });
       }
-      return res.json(users);
-    });
-};
-
+      User.countDocuments().exec((err, count) => {
+        return res.json({
+            ok : true,
+            users: users,
+            page: page,
+            totalPages: Math.ceil(count / perPage)
+        })
+      })
+    })
+  } else {
+    User.find({...query})
+    .where(whereQuery)
+    .limit(perPage * 1)
+    .skip(perPage * (page * 1 - 1))
+    .sort(sortContent)
+    .exec((err, users) => {
+      if (err) {
+        return res.status(401).json({
+          ok: false,
+          err,
+        });
+      }
+      User.countDocuments().exec((err, count) => {
+        return res.json({
+            ok : true,
+            users: users,
+            page: page,
+            totalPages: Math.ceil(count / perPage)
+        })
+      })
+    })
+  }
+  
+}
 CTRLS.getUser = (req, res) => {
   const { id } = req.params;
   User.findById(id).exec((err, user) => {

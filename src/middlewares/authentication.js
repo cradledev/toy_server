@@ -8,7 +8,7 @@ const isAuth = (req, res, next) => {
         if (token) {
           jwt.verify(token, config.secretKey, (err, user) => {
             if (err) {
-              return res.status(500).json({
+              return res.status(201).json({
                 ok: false,
                 msg: "Token is invalid!",
               });
@@ -19,13 +19,13 @@ const isAuth = (req, res, next) => {
             next();
           });
         } else {
-          return res.status(500).json({
+          return res.status(201).json({
             ok: false,
             msg: "Token is invalid!",
           });
         }
     } else {
-      return res.status(500).json({
+      return res.status(201).json({
         ok: false,
         msg: "Token is invalid!",
       });
@@ -44,7 +44,7 @@ const isAdminAuth = (req, res, next) => {
           if (token) {
             jwt.verify(token, config.secretKey, (err, user) => {
               if (err) {
-                return res.status(500).json({
+                return res.status(201).json({
                   ok: false,
                   msg: "Token is invalid!",
                 });
@@ -52,7 +52,7 @@ const isAdminAuth = (req, res, next) => {
           
               req.user = user.data;
               if (user.data.role != "ADMIN" || user.data.role != "SUPERADMIN") {
-                return res.status(500).json({
+                return res.status(201).json({
                   ok: false,
                   msg: "Token is invalid!",
                 });
@@ -60,13 +60,13 @@ const isAdminAuth = (req, res, next) => {
               next();
             });
           } else {
-            return res.status(500).json({
+            return res.status(201).json({
               ok: false,
               msg: "Token is invalid!",
             });
           }
       } else {
-        return res.status(500).json({
+        return res.status(201).json({
           ok: false,
           msg: "Token is invalid!",
         });
@@ -86,7 +86,7 @@ const token_image = (req, res, next) => {
         if (token) {
           jwt.verify(token, config.secretKey, (err, user) => {
             if (err) {
-              return res.status(500).json({
+              return res.status(201).json({
                 ok: false,
                 msg: "Token is invalid!",
               });
@@ -97,13 +97,13 @@ const token_image = (req, res, next) => {
             next();
           });
         } else {
-          return res.status(500).json({
+          return res.status(201).json({
             ok: false,
             msg: "Token is invalid!",
           });
         }
     } else {
-      return res.status(500).json({
+      return res.status(201).json({
         ok: false,
         msg: "Token is invalid!",
       });

@@ -16,13 +16,13 @@ CTRLS.login = (req, res) => {
     }
 
     if (!user) {
-      return res.status(404).json({
+      return res.status(201).json({
         ok: false,
         msg: "Username invalid!",
       });
     }
     if (!bcrypt.compareSync(req.body.password, user.password)) {
-      return res.status(404).json({
+      return res.status(201).json({
         ok: false,
         msg: "Password invalid!",
       });
@@ -31,7 +31,7 @@ CTRLS.login = (req, res) => {
     let token = jwt.sign({
         data: user,
     }, config.secretKey, { expiresIn: "1h" });
-
+   
     res.status(201).json({
       ok: true,
       user,
@@ -77,6 +77,19 @@ CTRLS.logout = (req, res) => {
     } else {
       res.json({msg:'Error', ok : false});
     }
+  });
+}
+
+CTRLS.tokenValidation = (req, res) => {
+  const token = req.body.token;
+  jwt.verify(token, config.secretKey, (err, user) => {
+    if (err) {
+      return res.status(201).json({
+        ok: false,
+        msg: "Token is invalid!",
+      });
+    }
+    return res.json({ok:true, msg : "Token is valid."})
   });
 }
 module.exports = CTRLS;

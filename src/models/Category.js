@@ -43,4 +43,5 @@ CategorySchema.pre('save', async function (next) {
   this.slug = slugify(this.name);
   next();
 });
+CategorySchema.index({slug: 'text', 'ancestors.slug': 'text'});
 module.exports = mongoose.model('Category', CategorySchema)

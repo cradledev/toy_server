@@ -6,6 +6,7 @@ const {isAuth} = require('../middlewares/authentication')
 
 router.post("/login", authCTRL.login);
 router.post("/signup", authCTRL.signup);
-router.post("/logout", isAuth, authCTRL.logout);
+router.post("/logout", authCTRL.logout);
+router.post("/isValidToken", authCTRL.tokenValidation)
 
 module.exports = router;
