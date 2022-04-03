@@ -4,12 +4,12 @@ const router = Router()
 const productCTRL = require('../controllers/products.controller')
 const { isAuth, token_image } = require('../middlewares/authentication')
 
-router.get('/', isAuth, productCTRL.getProducts)
-router.get('/:id', isAuth, productCTRL.getProduct)
-router.post('/', isAuth, productCTRL.saveProduct)
-router.put('/:id',isAuth, productCTRL.updateProduct)
+router.post('/getProducts', productCTRL.getProducts)
+router.get('/:id', productCTRL.getProduct)
+router.post('/', productCTRL.saveProduct)
+router.put('/updateProduct/:id', productCTRL.updateProduct)
 
-router.delete('/:id/:status', isAuth, productCTRL.deleteProduct)
+router.delete('/:id/:status', productCTRL.deleteProduct)
 
-router.get('/image/:img', token_image, productCTRL.viewImage)
+router.get('/image/:img', productCTRL.viewImage)
 module.exports = router

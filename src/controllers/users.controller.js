@@ -34,7 +34,7 @@ CTRLS.getUsers = (req, res) => {
 CTRLS.getUserByFilter = (req, res) => {
   const sort = req.body.sort;
   const sortColumn = req.body.sortColumn;
-  const q = req.body.q;
+  const q = req.body.q ? req.body.q : '';
   const status = req.body.status;
   const perPage = req.body.perPage;
   const role = req.body.role;

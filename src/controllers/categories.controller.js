@@ -3,12 +3,30 @@ const Category = require("../models/Category");
 const CTRLS = {};
 
 CTRLS.getCategories = (req, res) => {
-  Category.find({}).exec((err, categories) => {
-    return res.json(categories);
+  Category.find({}).select({'_id' : true, 'parent' : true, 'name' : true }).exec((err, categories) => {
+    const newArrayOfObj = categories.map(({
+      "_id": id, parent, name, droppable
+    }) => ({
+      id, parent, name, droppable : true
+    }));
+    return res.json({ok : true, categories : newArrayOfObj })
   });
 };
 
-CTRLS.getCategory = async (req, res) => {
+CTRLS.getCategory = (req, res) => {
+  const { id } = req.params;
+  Category.findById(id).exec((err, category) => {
+    if (err) {
+      return res.status(401).json({
+        ok: false,
+        err,
+      });
+    }
+    return res.json({ ok:true, category});
+  });
+};
+
+CTRLS.getCategoryBySlug = async (req, res) => {
   try {
     const category = await Category.find({ slug: req.body.slug })
       .select({
@@ -52,7 +70,7 @@ CTRLS.saveCategory = async (req, res) => {
 
 CTRLS.updateCategory = async (req, res) => {
   let category_id = req.body.category_id;
-  let new_parent_id = req.body.new_parent_id?req.body.new_parent_id:null;
+  let new_parent_id = req.body.new_parent_id ? req.body.new_parent_id : null;
   try {
     const category = await Category.findByIdAndUpdate(category_id, { $set: { "parent": new_parent_id } });
     buildHierarchyAncestors(category._id, new_parent_id)
@@ -78,10 +96,10 @@ CTRLS.renameCategory = async (req, res) => {
   }
 };
 CTRLS.deleteCategory = async (req, res) => {
-  let category_id = req.body.category_id
+  const { id } = req.params;
   try {
-    err = await Category.findByIdAndRemove(category_id);
-    result = await Category.deleteMany({"ancestors._id": category_id});
+    err = await Category.findByIdAndRemove(id);
+    result = await Category.deleteMany({"ancestors._id": id});
     res.status(201).json({ok:true, msg : "Category is deleted successfully."});
   } catch (err) {
     res.status(401).json({ok: false, err});
