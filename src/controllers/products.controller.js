@@ -22,6 +22,7 @@ CTRLS.getProducts = async (req, res) => {
   let _category;
   if (category != null) {
     _category = await CategoryM.find({ "ancestors._id":  category }, {"_id": 1}).exec()
+    let _ancestorsIds = _category.map(el => el._id)
     query = {
       $and : [
          { $or : [
@@ -29,13 +30,12 @@ CTRLS.getProducts = async (req, res) => {
           { 'description': { '$regex': q, '$options': 'i' } }
         ]}, 
         { $or : [ 
-          {"category" : {$in : _category._id } },
+          {"category" : {$in : _ancestorsIds } },
           {"category" : category }
         ]}
       ]
       };
   }
-
   const sortContent = {}
   if (sort == "price-asc") {
     sortContent.price = "1";
