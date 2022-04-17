@@ -23,6 +23,12 @@ const ProductSchema = new Schema({
     type: Number,
     required: true
   },
+  events : [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Discount",
+    }
+  ],
   stock: {
     type: Number,
     required: true
@@ -35,6 +41,11 @@ const ProductSchema = new Schema({
   status: {
     type: Boolean,
     default: true
+  },
+  recommend : {
+    type : Boolean,
+    default : false,
+    required : false
   }
 },
 {

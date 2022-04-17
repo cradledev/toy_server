@@ -38,6 +38,17 @@ const UserSchema = new Schema({
     enum: ["SUPERADMIN","ADMIN","USER"],
     default: "USER",
   },
+  events : [
+    {
+      event: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Discount",
+        index : true
+      },
+      times : Number,
+      usedTimes : { type : Number, default : 0}
+    }
+  ],
   status: {
     type: Boolean,
     default: true

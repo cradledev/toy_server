@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
+
 const OrderSchema = new Schema({
   dateReg: {
     type: Date,
@@ -18,9 +19,14 @@ const OrderSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: "Product",
       },
-      qty: Number,
+      price : Number,
+      qty: Number
     },
   ],
+  active : {
+    type : Boolean,
+    default : true
+  }
 });
 
 module.exports = mongoose.model("Order", OrderSchema);

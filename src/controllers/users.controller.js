@@ -71,7 +71,7 @@ CTRLS.getUserByFilter = (req, res) => {
           err,
         });
       }
-      User.countDocuments().exec((err, count) => {
+      User.find({...query}).count().exec((err, count) => {
         return res.json({
             ok : true,
             users: users,
@@ -93,7 +93,7 @@ CTRLS.getUserByFilter = (req, res) => {
           err,
         });
       }
-      User.countDocuments().exec((err, count) => {
+      User.find({...query}).where(whereQuery).count().exec((err, count) => {
         return res.json({
             ok : true,
             users: users,

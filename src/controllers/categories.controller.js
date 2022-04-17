@@ -1,4 +1,5 @@
 const Category = require("../models/Category");
+const path = require("path");
 
 const CTRLS = {};
 
@@ -26,9 +27,32 @@ CTRLS.getCategory = (req, res) => {
   });
 };
 
+CTRLS.getAllCategories = (req, res) => {
+  const perPage = req.body.perPage;
+  const page = Math.max(0, req.body.page);
+  Category.find({})
+    .limit(perPage * 1)
+    .skip(perPage * (page * 1 - 1))
+    .exec((err, categories) => {
+      if (err) {
+        return res.status(401).json({
+          ok: false,
+          err,
+        });
+      }
+      Category.countDocuments({}).exec((err, count) => {
+        return res.json({
+          ok : true,
+          categories,
+          total: count
+        })
+      })
+  });
+};
+
 CTRLS.getCategoryBySlug = async (req, res) => {
   try {
-    const category = await Category.find({ slug: req.body.slug })
+    const category = await Category.find({ slug: { '$regex': req.body.slug, '$options': 'i' } })
       .select({
         "_id": false, 
         "name": true,
@@ -54,18 +78,42 @@ CTRLS.getDescendants = async (req, res) => {
 
 CTRLS.saveCategory = async (req, res) => {
   let parent = req.body.parent ? req.body.parent : null;
-  const category = new Category({
-    name: req.body.category_name,
-    parent
-  });
-
-  try {
-    let newCategory = await category.save();
-    buildAncestors(newCategory._id, parent);
-    res.status(201).json({ ok: true, msg: `Category ${newCategory._id}` });
-  } catch (err) {
-    res.status(401).json({ok:false, err});
+  
+  if (!req.files) {
+    try {
+      const category = new Category({
+        name: req.body.category_name,
+        parent
+      });
+      let newCategory = await category.save();
+      buildAncestors(newCategory._id, parent);
+      res.status(201).json({ ok: true, msg: `Category ${newCategory._id}` });
+    } catch (err) {
+      res.status(401).json({ok:false, err});
+    }
+  } else {
+    try {
+      const image = req.files.image;
+      const _temp_result = path.parse(image.name);
+      const _target_name = Date.now() + _temp_result.name + _temp_result.ext;
+      image.mv(`uploads/categories/${_target_name}`, async (err) => {
+        if (err) {
+          return res.status(500).send(err);
+        }
+        const category = new Category({
+          name: req.body.category_name,
+          parent,
+          image : _target_name
+        });
+        let newCategory = await category.save();
+        buildAncestors(newCategory._id, parent);
+        res.status(201).json({ ok: true, msg: `Category ${newCategory._id}` });
+      })
+    } catch (err) {
+      res.status(401).json({ok:false, err});
+    }
   }
+  
 };
 
 CTRLS.updateCategory = async (req, res) => {
@@ -86,13 +134,34 @@ CTRLS.renameCategory = async (req, res) => {
     name : req.body.category_name,
     slug : slugify(req.body.category_name)
   }
-  try {
-    const _result = await Category.findByIdAndUpdate(category_id, category, {new : true});
-    const _f_result = await Category.updateMany({"ancestors._id": category_id}, {$set : {"ancestors.$.name": category.name, "ancestors.$.slug": category.slug} })
-    
-    res.status(201).json({ok:true, msg : "Category is renamed successfully."});
-  } catch (err) {
-    res.status(401).json({ok: false, err});
+  if (!req.files) {
+    try {
+      const _result = await Category.findByIdAndUpdate(category_id, category, {new : true});
+      const _f_result = await Category.updateMany({"ancestors._id": category_id}, {$set : {"ancestors.$.name": category.name, "ancestors.$.slug": category.slug} })
+      
+      res.status(201).json({ok:true, msg : "Category is renamed successfully."});
+    } catch (err) {
+      res.status(401).json({ok: false, err})
+    }
+  } else {
+    try {
+      const image = req.files.image;
+      const _temp_result = path.parse(image.name);
+      const _target_name = Date.now() + _temp_result.name + _temp_result.ext;
+      image.mv(`uploads/categories/${_target_name}`, async (err) => {
+        if (err) {
+          return res.status(500).send(err);
+        }
+        category.image = _target_name;
+
+        const _result = await Category.findByIdAndUpdate(category_id, category, {new : true});
+        const _f_result = await Category.updateMany({"ancestors._id": category_id}, {$set : {"ancestors.$.name": category.name, "ancestors.$.slug": category.slug} })
+        
+        res.status(201).json({ok:true, msg : "Category is renamed successfully."});
+      });
+    } catch (err) {
+      res.status(401).json({ok: false, err})
+    }
   }
 };
 CTRLS.deleteCategory = async (req, res) => {
@@ -150,4 +219,13 @@ function slugify(string) {
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '') // Trim - from end of text
 }
+
+CTRLS.viewImage = (req, res) => {
+  const urlImage = path.join(
+    __dirname,
+    "./../../uploads/categories",
+    req.params.img // /products/image/:img
+  );
+  return res.sendFile(urlImage);
+};
 module.exports = CTRLS;

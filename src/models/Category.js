@@ -18,7 +18,10 @@ const CategorySchema = new Schema({
         },
         name: String,
         slug: String
-    }]
+    }],
+    image : {
+      type : String, required : false
+    }
   },
   {
     timestamps: true
